@@ -17,13 +17,6 @@ class priorWeight(object):
 		super(priorWeight, self).__init__()
 		self.step = step
 
-class ClassName(object):
-	"""docstring for ClassName"""
-	def __init__(self, arg):
-		super(ClassName, self).__init__()
-		self.arg = arg
-		
-
 
 class posteriorWeight(object):
 	"""docstring for posteriorWeight"""
@@ -48,28 +41,32 @@ class Yt(object):
 
 class Xt(object):
 	"""docstring for Xt"""
-	def __init__(self, u, length, step,infodata):
+	def __init__(self, value, step):
 		super(Xt, self).__init__()
-		self.u = u
-		self.lenght = length
-		self.infodata = infodata
+		self.step = step
+		self.value=value
 
 		
 
-def initial():
+def initial(datamatrix):
 	covariancematrix=numpy.eye(4,4)
 	umean=numpy.ones(4).T
 	priorweight=[]
 	posteriorweight=[]
 	yt=[]	
+	xt=[]
 	for i in range(0,10000):
 		priorweight.append(priorWeight(i))
 		#print priorweight[i].cov
 		posteriorweight.append(posteriorWeight(i))
 		yt.append(Yt(i))
+		xt.append(Xt(datamatrix[i,1:4],datamatrix[i,0]))
 	priorweight=numpy.array(priorweight)
 	posteriorweight=numpy.array(posteriorweight)
 	yt=numpy.array(yt)
+	xt=numpy.array(xt)
+	return priorweight,posteriorweight,xt,yt
+
 
 def readFile():
 	data = open("stocks.txt","r")
@@ -81,7 +78,7 @@ def readFile():
 		linecount=linecount+1
 		line=line.replace("\n","").split(",")
 		if linecount>=3 and linecount<=10002:
-			infodata.append([int(line[0]),float(line[1]),float(line[2]),float(line[3]),float(line[4]),float(line[5])])
+			infodata.append([int(line[0])-1,float(line[1]),float(line[2]),float(line[3]),float(line[4]),float(line[5])])
 	#print len(infodata)
 	#print infodata[9999]
 	datamatrix=numpy.array(infodata)
@@ -95,11 +92,12 @@ def readFile():
 
 
 
-
 def main(argv):
-	initial()
+	
 	datamatrix=readFile()
-	print datamatrix[0,:]
+	priorweight,posteriorweight,xt,yt=initial(datamatrix)
+
+
 	figure(1)
 	plt.plot(datamatrix[:,0],datamatrix[:,1:5])
 	#plt.plot(datamatrix[:,0],datamatrix[:,1:4],'.')
